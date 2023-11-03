@@ -10,7 +10,6 @@ namespace ZapExplorer.BusinessLayer.Models
     {
         public string Name { get; set; }
         public int Size { get; set; }
-        public DirectoryItem? ParentDirectory { get; set; }
         public Item(string name)
         {
             Name = name;

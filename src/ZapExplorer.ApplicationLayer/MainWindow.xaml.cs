@@ -126,10 +126,5 @@ namespace ZapExplorer.ApplicationLayer
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            ZapArchive.SortItems();
-        }
     }
 }

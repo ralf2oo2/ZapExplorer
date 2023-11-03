@@ -88,9 +88,12 @@ namespace ZapExplorer.BusinessLayer
 
                     if (directoryStack.Count > 0)
                     {
-                        currentItem.ParentDirectory = directoryStack.Last();
+                        directoryStack.Last().Items.Add(currentItem);
                     }
-                    archive.Items.Add(currentItem);
+                    else
+                    {
+                        archive.Items.Add(currentItem);
+                    }
 
                     if (currentItem is DirectoryItem)
                     {

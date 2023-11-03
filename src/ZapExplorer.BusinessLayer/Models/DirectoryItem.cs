@@ -8,6 +8,7 @@ namespace ZapExplorer.BusinessLayer.Models
 {
     public class DirectoryItem : Item
     {
+        public List<Item> Items { get; set; } = new List<Item>();
         public DirectoryItem(string name) : base(name) { }
     }
 }

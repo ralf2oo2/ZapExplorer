@@ -18,8 +18,11 @@ namespace ZapExplorer.ApplicationLayer.Converters
                 return null;
 
             ZapArchive archive = (ZapArchive)values[0];
-            List<Item> items = archive.Items.Where(x => x.ParentDirectory == ((DirectoryItem)values[1])).ToList();
-            return items;
+            if (values[1] != null)
+            {
+                return ((DirectoryItem)values[1]).Items;
+            }
+            return archive.Items;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
