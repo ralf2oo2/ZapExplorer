@@ -79,6 +79,11 @@ namespace ZapExplorer.ApplicationLayer
             }
         }
 
+        private void SaveFile(object sender, RoutedEventArgs e)
+        {
+            _zapFileService.SaveArchive(ZapArchive, "testheader.zap");
+        }
+
         private void Return(object sender, RoutedEventArgs e)
         {
             if(CurrentDirectory == null)

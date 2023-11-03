@@ -39,6 +39,7 @@
         <Menu>
             <MenuItem Header="_File">
                 <MenuItem Header="_Open" Click="OpenFile"/>
+                <MenuItem Header="_Save" Click="SaveFile"/>
             </MenuItem>
         </Menu>
         <!-- Breadcrumbs bar -->
@@ -132,6 +133,5 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Button Content="test" Click="Button_Click" Grid.Row="3"/>
     </Grid>
 </Window>

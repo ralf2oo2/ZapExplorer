@@ -18,5 +18,18 @@ namespace ZapExplorer.BusinessLayer.Models
         {
             Origin = origin;
         }
+        public void SortItems()
+        {
+            SortItems(Items);
+        }
+        private void SortItems(List<Item> items)
+        {
+            items.OrderBy(x => x.Name);
+            foreach(Item item in items)
+            {
+                if (item is DirectoryItem)
+                    SortItems(((DirectoryItem)item).Items);
+            }
+        }
     }
 }

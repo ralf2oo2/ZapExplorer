@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Text;
 using ZapExplorer.BusinessLayer.Models;
 
 namespace ZapExplorer.BusinessLayer
@@ -16,11 +18,26 @@ namespace ZapExplorer.BusinessLayer
         }
         public void SaveArchive(ZapArchive archive, string path)
         {
-
+            byte[] header = CreateHeader(archive);
+            using (var fs = new FileStream(path, FileMode.Create))
+            {
+                fs.Write(header, 0, header.Length);
+            }
         }
-        public byte[] CreateHeader(ZapArchive archive)
+        private byte[] CreateHeader(ZapArchive archive)
         {
             List<byte> headerBytes = new List<byte>();
+            archive.SortItems();
+
+            List<Item> items = new List<Item>(archive.Items);
+
+            foreach (Item item in items)
+            {
+                if (item is DirectoryItem)
+                    AddDirectoryEnds(((DirectoryItem)item).Items);
+            }
+
+            items = FlattenDirectory(items);
 
             // Adding ZAP
             headerBytes.AddRange(new byte[] { (byte)'Z', (byte)'A', (byte)'P' , 0x0});
@@ -29,12 +46,65 @@ namespace ZapExplorer.BusinessLayer
             headerBytes.AddRange(BitConverter.GetBytes(archive.PaddingSize));
 
             // Adding temporary value for count
-            headerBytes.AddRange(new byte[] { 0x0, 0x0, 0x0, 0x0 });
+            headerBytes.AddRange(BitConverter.GetBytes(items.Count));
 
             // Adding unknown value;
             headerBytes.AddRange(BitConverter.GetBytes(archive.UnknownValue));
+            foreach(Item item in items)
+            {
+                // Adding unknown bytes, maybe it marks the start of an item?
+                headerBytes.AddRange(new byte[] { 0x0d, 0x0a });
+                headerBytes.AddRange(BitConverter.GetBytes(item.Size));
+
+                string name = item.Name.Trim();
+                if(item is DirectoryItem)
+                {
+                    if (item.Name != "..")
+                        name += "/";
+                }
+
+                headerBytes.AddRange(new byte[] { (byte)(name.Length + 1), 0x0 });
+
+                if(name == "")
+                {
+                    headerBytes.AddRange(new byte[] { 0x2e, 0x2e });
+                }
+                else
+                {
+                    headerBytes.AddRange(Encoding.ASCII.GetBytes(name));
+                }
+                headerBytes.Add(0x0);
+            }
+            headerBytes.AddRange(new byte[] { 0x0d, 0x0a });
+            int totalPadding = (int)GetPadding(headerBytes.Count, archive.PaddingSize);
+
+            while(headerBytes.Count < totalPadding)
+            {
+                headerBytes.Add(0x0);
+            }
+
 
             return headerBytes.ToArray();
+        }
+        private List<Item> FlattenDirectory(List<Item> archiveItems)
+        {
+            List<Item> items = new List<Item>();
+            foreach (Item item in archiveItems)
+            {
+                items.Add(item);
+                if (item is DirectoryItem)
+                    items.AddRange(FlattenDirectory(((DirectoryItem)item).Items));
+            }
+            return items;
+        }
+        private void AddDirectoryEnds(List<Item> archiveItems)
+        {
+            foreach(Item item in archiveItems)
+            {
+                if (item is DirectoryItem)
+                    AddDirectoryEnds(((DirectoryItem)item).Items);
+            }
+            archiveItems.Add(new DirectoryItem(".."));
         }
         public ZapArchive? GetArchive(string path)
         {
@@ -77,11 +147,11 @@ namespace ZapExplorer.BusinessLayer
                     if (nameBytes[nameBytes.Length -2] == (byte)'/')
                     {
                         nameBytes[nameBytes.Length -2] = 0x0;
-                        currentItem = new DirectoryItem(System.Text.Encoding.Default.GetString(nameBytes));
+                        currentItem = new DirectoryItem(System.Text.Encoding.Default.GetString(nameBytes).TrimEnd('\0'));
                     }
                     else
                     {
-                        currentItem = new FileItem(System.Text.Encoding.Default.GetString(nameBytes));
+                        currentItem = new FileItem(System.Text.Encoding.Default.GetString(nameBytes).TrimEnd('\0'));
                     }
 
                     currentItem.Size = BitConverter.ToInt32(new byte[] { itemInfo[2], itemInfo[3], itemInfo[4], itemInfo[5] });
