@@ -1,0 +1,137 @@
+﻿<Window x:Class="ZapExplorer.ApplicationLayer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ZapExplorer.ApplicationLayer"
+        xmlns:converters="clr-namespace:ZapExplorer.ApplicationLayer.Converters"
+        xmlns:Models="clr-namespace:ZapExplorer.BusinessLayer.Models;assembly=ZapExplorer.BusinessLayer"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Window.Resources>
+        <DrawingImage x:Key="arrow">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                    <GeometryDrawing Brush="White" Geometry="F1 M24,24z M0,0z M12.718,4.707L12.718,4.707 11.305,3.292 2.585,12 11.305,20.707 12.718,19.292 6.417,13 20,13 20,11 6.416,11 12.718,4.707z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <Style x:Key="linkButton" TargetType="Button">
+            <Setter Property="Foreground" Value="White" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="true">
+                    <Setter Property="Foreground" Value="LightGray" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <converters:DirectoryItemMultiConverter x:Key="DirectoryMultiConverter"/>
+        <converters:FileIconValueConverter x:Key="FileIconValueConverter"/>
+        <converters:FileSizeNotationValueConverter x:Key="FileSizeNotationValueConverter"/>
+        <converters:FileSizeVisibilityValueConverter x:Key="FileSizeVisibilityValueConverter"/>
+    </Window.Resources>
+    <Grid Background="#2b3355">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20px"/>
+            <RowDefinition Height="20px"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="20px"/>
+        </Grid.RowDefinitions>
+        <Menu>
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open" Click="OpenFile"/>
+            </MenuItem>
+        </Menu>
+        <!-- Breadcrumbs bar -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="24px"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="24px"/>
+            </Grid.ColumnDefinitions>
+            <Button Click="Return">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Image Source="{StaticResource arrow}"/>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+            <Border BorderBrush="#333d66" BorderThickness="2" Grid.Column="1">
+                <ScrollViewer VerticalScrollBarVisibility="Hidden">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Root" Tag="root" Style="{StaticResource linkButton}" Click="ChangeDirectory" Grid.Column="1">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <TextBlock>
+                                <ContentPresenter />
+                                    </TextBlock>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        <ItemsControl ItemsSource="{Binding BreadCrumbsBar}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding Name}" Style="{StaticResource linkButton}" Tag="{Binding}" Click="ChangeDirectory">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="14px"/>
+                                                        <ColumnDefinition Width="auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text=" >"/>
+                                                    <TextBlock Grid.Column="1">
+                                                        <ContentPresenter />
+                                                    </TextBlock>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+        <!-- File explorer -->
+        <ListBox Background="#232A46" MouseDoubleClick="OnItemMouseDoubleClick" Grid.Row="2">
+            <ListBox.Style>
+                <Style TargetType="ListBox">
+                    <Setter Property="BorderThickness" Value="0"/>
+                </Style>
+            </ListBox.Style>
+            <ListBox.ItemsSource>
+                <MultiBinding Converter="{StaticResource DirectoryMultiConverter}">
+                    <Binding Path="ZapArchive"/>
+                    <Binding Path="CurrentDirectory" UpdateSourceTrigger="PropertyChanged"/>
+                </MultiBinding>
+            </ListBox.ItemsSource>
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="16px"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="50px"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Source="{Binding ., Converter={StaticResource FileIconValueConverter}}"/>
+                        <TextBlock Text="{Binding Name}" Margin="3,0,0,0" Foreground="White" Grid.Column="1"/>
+                        <TextBlock Text="{Binding Size, Converter={StaticResource FileSizeNotationValueConverter}}" Visibility="{Binding ., Converter={StaticResource FileSizeVisibilityValueConverter}}" Foreground="White" Grid.Column="3"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button Content="test" Click="Button_Click" Grid.Row="3"/>
+    </Grid>
+</Window>

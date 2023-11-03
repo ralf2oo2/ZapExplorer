@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZapExplorer.BusinessLayer", "ZapExplorer.BusinessLayer\ZapExplorer.BusinessLayer.csproj", "{DA45A738-656D-4EC6-9505-2D54CF2FD34A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZapExplorer.ApplicationLayer", "ZapExplorer.ApplicationLayer\ZapExplorer.ApplicationLayer.csproj", "{4457610C-D47A-40A5-9A8D-8320DAC1EAEC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA45A738-656D-4EC6-9505-2D54CF2FD34A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA45A738-656D-4EC6-9505-2D54CF2FD34A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA45A738-656D-4EC6-9505-2D54CF2FD34A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA45A738-656D-4EC6-9505-2D54CF2FD34A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4457610C-D47A-40A5-9A8D-8320DAC1EAEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4457610C-D47A-40A5-9A8D-8320DAC1EAEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4457610C-D47A-40A5-9A8D-8320DAC1EAEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4457610C-D47A-40A5-9A8D-8320DAC1EAEC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A14D180D-FBBA-4C30-AEB8-ADDD1AB2BB5B}
+	EndGlobalSection
+EndGlobal
