@@ -38,8 +38,10 @@
         </Grid.RowDefinitions>
         <Menu>
             <MenuItem Header="_File">
-                <MenuItem Header="_Open" Click="OpenFile"/>
+                <MenuItem Header="_Open..." Click="OpenFile"/>
                 <MenuItem Header="_Save" Click="SaveFile"/>
+                <MenuItem Header="_Save As..."/>
+                <MenuItem Header="_Import..." Click="AddFile"/>
             </MenuItem>
         </Menu>
         <!-- Breadcrumbs bar -->

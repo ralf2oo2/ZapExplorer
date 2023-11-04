@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace ZapExplorer.BusinessLayer.Models
 {
+    [Serializable]
     public class DirectoryItem : Item
     {
         public List<Item> Items { get; set; } = new List<Item>();

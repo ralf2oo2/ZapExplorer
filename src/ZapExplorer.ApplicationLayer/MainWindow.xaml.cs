@@ -28,6 +28,7 @@ namespace ZapExplorer.ApplicationLayer
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private readonly ZapFileService _zapFileService;
+        private readonly AddFileService _addFileService;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -62,6 +63,7 @@ namespace ZapExplorer.ApplicationLayer
             InitializeComponent();
             DataContext = this;
             _zapFileService = new ZapFileService();
+            _addFileService = new AddFileService();
             BreadCrumbsBar = new ObservableCollection<DirectoryItem>();
         }
         
@@ -76,6 +78,30 @@ namespace ZapExplorer.ApplicationLayer
             if(openFileDialog.ShowDialog() == true)
             {
                 ZapArchive = _zapFileService.GetArchive(openFileDialog.FileName);
+            }
+        }
+
+        private void AddFile(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Title = "Select a file to add";
+            openFileDialog.Filter = "All files (*.*)|*.*";
+            openFileDialog.FilterIndex = 0;
+            openFileDialog.RestoreDirectory = true;
+            openFileDialog.Multiselect = true;
+            if (openFileDialog.ShowDialog() == true)
+            {
+                foreach (string file in openFileDialog.FileNames)
+                {
+                    if(CurrentDirectory == null)
+                    {
+                        ZapArchive.Items.Add(_addFileService.AddFile(file));
+                    }
+                    else
+                    {
+                        CurrentDirectory.Items.Add(_addFileService.AddFile(file));
+                    }
+                }
             }
         }
 

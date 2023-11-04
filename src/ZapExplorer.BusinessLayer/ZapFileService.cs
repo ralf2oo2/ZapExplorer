@@ -26,7 +26,7 @@ namespace ZapExplorer.BusinessLayer
         }
         private byte[] CreateHeader(ZapArchive archive)
         {
-            ZapArchive clonedArchive = (ZapArchive)archive.Clone();
+            ZapArchive clonedArchive = Utility.DeepClone(archive);
 
             List<byte> headerBytes = new List<byte>();
             clonedArchive.SortItems();
