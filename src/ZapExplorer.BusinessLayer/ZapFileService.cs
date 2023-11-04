@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -31,7 +32,7 @@ namespace ZapExplorer.BusinessLayer
             List<byte> headerBytes = new List<byte>();
             clonedArchive.SortItems();
 
-            List<Item> items = new List<Item>(clonedArchive.Items);
+            ObservableCollection<Item> items = new ObservableCollection<Item>(clonedArchive.Items);
 
             foreach (Item item in items)
             {
@@ -88,18 +89,23 @@ namespace ZapExplorer.BusinessLayer
 
             return headerBytes.ToArray();
         }
-        private List<Item> FlattenDirectory(List<Item> archiveItems)
+        private ObservableCollection<Item> FlattenDirectory(ObservableCollection<Item> archiveItems)
         {
-            List<Item> items = new List<Item>();
+            ObservableCollection<Item> items = new ObservableCollection<Item>();
             foreach (Item item in archiveItems)
             {
                 items.Add(item);
                 if (item is DirectoryItem)
-                    items.AddRange(FlattenDirectory(((DirectoryItem)item).Items));
+                {
+                    foreach(Item flattenedDirItem in FlattenDirectory(((DirectoryItem)item).Items))
+                    {
+                        items.Add(flattenedDirItem);
+                    }
+                }
             }
             return items;
         }
-        private void AddDirectoryEnds(List<Item> archiveItems)
+        private void AddDirectoryEnds(ObservableCollection<Item> archiveItems)
         {
             foreach(Item item in archiveItems)
             {

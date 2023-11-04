@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace ZapExplorer.BusinessLayer.Models
         public string Origin { get; private set; }
         public int PaddingSize { get; set; }
         public int UnknownValue { get; set; }
-        public List<Item> Items { get; set; } = new List<Item>();
+        public ObservableCollection<Item> Items { get; set; } = new ObservableCollection<Item>();
 
         public ZapArchive(string origin)
         {
@@ -23,7 +24,7 @@ namespace ZapExplorer.BusinessLayer.Models
         {
             SortItems(Items);
         }
-        private void SortItems(List<Item> items)
+        private void SortItems(ObservableCollection<Item> items)
         {
             items.OrderBy(x => x.Name);
             foreach(Item item in items)
