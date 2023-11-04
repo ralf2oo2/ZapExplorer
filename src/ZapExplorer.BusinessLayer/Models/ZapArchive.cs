@@ -11,7 +11,7 @@ namespace ZapExplorer.BusinessLayer.Models
     [Serializable]
     public class ZapArchive
     {
-        public string Origin { get; private set; }
+        public string Origin { get; set; }
         public int PaddingSize { get; set; }
         public int UnknownValue { get; set; }
         public ObservableCollection<Item> Items { get; set; } = new ObservableCollection<Item>();
@@ -19,6 +19,10 @@ namespace ZapExplorer.BusinessLayer.Models
         public ZapArchive(string origin)
         {
             Origin = origin;
+        }
+        public ZapArchive()
+        {
+
         }
         public void SortItems()
         {

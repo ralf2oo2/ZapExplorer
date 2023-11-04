@@ -10,20 +10,28 @@ namespace ZapExplorer.BusinessLayer
 {
     public class AddFileService
     {
-        private static string FILES_PATH = "Temp";
+        public static string FILES_PATH = "Temp";
+        public string Uuid;
         public bool UnsavedProgress { get; set; } = false;
         public AddFileService()
         {
-            if(!Directory.Exists(FILES_PATH))
+            GenUuid();
+            if (!Directory.Exists($"{FILES_PATH}/{Uuid}"))
             {
-                Directory.CreateDirectory(FILES_PATH);
+                Directory.CreateDirectory($"{FILES_PATH}/{Uuid}");
             }
+        }
+
+        public void GenUuid()
+        {
+            Uuid = Guid.NewGuid().ToString();
         }
 
         public FileItem AddFile(string path)
         {
+            UnsavedProgress = true;
             FileInfo fi = new FileInfo(path);
-            File.Copy(path, $"{FILES_PATH}/{fi.Name}", true);
+            File.Copy(path, $"{FILES_PATH}/{Uuid}/{fi.Name}", true);
             FileItem fileItem = new FileItem(Path.GetFileName(path));
             fileItem.Origin = path;
             fileItem.StartPos = 0;
@@ -31,6 +39,31 @@ namespace ZapExplorer.BusinessLayer
             fileItem.Size = (int)fi.Length;
             return fileItem;
 
+        }
+
+        public void RefreshFolder()
+        {
+            PurgeFolder();
+            GenUuid();
+            UnsavedProgress = false;
+            if (!Directory.Exists($"{FILES_PATH}/{Uuid}"))
+            {
+                Directory.CreateDirectory($"{FILES_PATH}/{Uuid}");
+            }
+        }
+
+        public void RemoveFile(FileItem file)
+        {
+
+        }
+
+        public void PurgeFolder()
+        {
+            DirectoryInfo dir = new DirectoryInfo($"{FILES_PATH}/{Uuid}");
+            if(dir.Exists)
+            {
+                dir.Delete(true);
+            }
         }
     }
 }

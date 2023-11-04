@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -17,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ZapExplorer.ApplicationLayer.Windows;
 using ZapExplorer.BusinessLayer;
 using ZapExplorer.BusinessLayer.Models;
 
@@ -66,9 +68,49 @@ namespace ZapExplorer.ApplicationLayer
             _addFileService = new AddFileService();
             BreadCrumbsBar = new ObservableCollection<DirectoryItem>();
         }
-        
+
+        private void NewFile(object sender, RoutedEventArgs e)
+        {
+            if (_addFileService.UnsavedProgress)
+            {
+                var result = MessageBox.Show("There are unsaved changes, Discard changes?", "Warning", MessageBoxButton.YesNo);
+                if (result != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+            }
+            Title = "ZapExplorer";
+            NewFileWindow newFileWindow = new NewFileWindow();
+            newFileWindow.ShowDialog();
+            if (newFileWindow.Confirmed)
+            {
+                Title = "New File";
+                _addFileService.RefreshFolder();
+                ZapArchive = new ZapArchive();
+                ZapArchive.PaddingSize = newFileWindow.PaddingSize;
+                CurrentDirectory = null;
+                BreadCrumbsBar.Clear();
+            }
+        }
+
         private void OpenFile(object sender, RoutedEventArgs e)
         {
+            if (_addFileService.UnsavedProgress)
+            {
+                var result = MessageBox.Show("There are unsaved changes, Discard changes?", "Warning", MessageBoxButton.YesNo);
+                if (result != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+            }
+
+            _addFileService.RefreshFolder();
+            ZapArchive = null;
+            CurrentDirectory = null;
+            BreadCrumbsBar.Clear();
+
+            Title = "ZapExplorer";
+
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Title = "Select zap archive";
             openFileDialog.DefaultExt = "zap";
@@ -78,6 +120,8 @@ namespace ZapExplorer.ApplicationLayer
             if(openFileDialog.ShowDialog() == true)
             {
                 ZapArchive = _zapFileService.GetArchive(openFileDialog.FileName);
+                FileInfo fi = new FileInfo(openFileDialog.FileName);
+                Title = fi.Name;
             }
         }
 
@@ -104,10 +148,62 @@ namespace ZapExplorer.ApplicationLayer
                 }
             }
         }
+        private void CreateFolder(object sender, RoutedEventArgs e)
+        {
+            CreateFolderWindow createFolderWindow = new CreateFolderWindow();
+            createFolderWindow.ShowDialog();
+            if(createFolderWindow.Confirmed)
+            {
+                DirectoryItem directoryItem = new DirectoryItem(createFolderWindow.FolderName);
+                if (CurrentDirectory == null)
+                {
+                    ZapArchive.Items.Add(directoryItem);
+                }
+                else
+                {
+                    CurrentDirectory.Items.Add(directoryItem);
+                }
+            }
+        }
+
+        private void WindowClosing(object sender, CancelEventArgs e)
+        {
+            if(_addFileService.UnsavedProgress)
+            {
+                var result = MessageBox.Show("There are unsaved changes, Do you want to quit?", "Warning", MessageBoxButton.YesNo);
+                if (result != MessageBoxResult.Yes)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+            _addFileService.PurgeFolder();
+        }
 
         private void SaveFile(object sender, RoutedEventArgs e)
         {
-            _zapFileService.SaveArchive(ZapArchive, "testheader.zap");
+            _zapFileService.SaveArchive(ZapArchive, ZapArchive.Origin);
+            _addFileService.RefreshFolder();
+        }
+
+        private void SaveFileAs(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Title = "Save zap archive";
+            saveFileDialog.DefaultExt = "zap";
+            saveFileDialog.Filter = "zap archives (*.zap)|*zap";
+            saveFileDialog.FilterIndex = 0;
+            saveFileDialog.RestoreDirectory = true;
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                FileInfo fi = new FileInfo(saveFileDialog.FileName);
+                ZapArchive.Origin = saveFileDialog.FileName;
+                OnPropertyChanged(nameof(ZapArchive));
+                Title = fi.Name;
+                _zapFileService.SaveArchive(ZapArchive, saveFileDialog.FileName);
+                _addFileService.RefreshFolder();
+            }
         }
 
         private void Return(object sender, RoutedEventArgs e)

@@ -24,7 +24,14 @@ namespace ZapExplorer.BusinessLayer
             byte[] header = CreateHeader(clonedArchive);
             clonedArchive.Items = FlattenDirectory(clonedArchive.Items);
 
-            using (var fs = new FileStream(path, FileMode.Create))
+            string savePath = path;
+            if(File.Exists(path))
+            {
+                FileInfo fi = new FileInfo(path);
+                savePath = $"{AddFileService.FILES_PATH}/{fi.Name}";
+            }
+
+            using (var fs = new FileStream(savePath, FileMode.Create))
             {
                 fs.Write(header, 0, header.Length);
                 foreach(var item in clonedArchive.Items.Where(x => x is FileItem && x.Size > 0))
@@ -43,6 +50,12 @@ namespace ZapExplorer.BusinessLayer
                         Debug.WriteLine(fs.Position);
                     }
                 }
+            }
+
+            if(savePath != path)
+            {
+                File.Delete(path);
+                File.Move(savePath, path);
             }
         }
         private byte[] CreateHeader(ZapArchive clonedArchive)

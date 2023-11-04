@@ -7,7 +7,7 @@
         xmlns:converters="clr-namespace:ZapExplorer.ApplicationLayer.Converters"
         xmlns:Models="clr-namespace:ZapExplorer.BusinessLayer.Models;assembly=ZapExplorer.BusinessLayer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="ZapEdit" Height="450" Width="800" Closing="WindowClosing">
     <Window.Resources>
         <DrawingImage x:Key="arrow">
             <DrawingImage.Drawing>
@@ -28,6 +28,8 @@
         <converters:FileIconValueConverter x:Key="FileIconValueConverter"/>
         <converters:FileSizeNotationValueConverter x:Key="FileSizeNotationValueConverter"/>
         <converters:FileSizeVisibilityValueConverter x:Key="FileSizeVisibilityValueConverter"/>
+        <converters:OpenFileActionsValueConverter x:Key="OpenFileActionsValueConverter"/>
+        <converters:CanSaveValueConverter x:Key="CanSaveValueConverter"/>
     </Window.Resources>
     <Grid Background="#2b3355">
         <Grid.RowDefinitions>
@@ -38,10 +40,14 @@
         </Grid.RowDefinitions>
         <Menu>
             <MenuItem Header="_File">
+                <MenuItem Header="_New..." Click="NewFile"/>
                 <MenuItem Header="_Open..." Click="OpenFile"/>
-                <MenuItem Header="_Save" Click="SaveFile"/>
-                <MenuItem Header="_Save As..."/>
-                <MenuItem Header="_Import..." Click="AddFile"/>
+                <MenuItem Header="_Save" Click="SaveFile" IsEnabled="{Binding ZapArchive, Converter={StaticResource CanSaveValueConverter}}"/>
+                <MenuItem Header="_Save As..." Click="SaveFileAs" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
+            </MenuItem>
+            <MenuItem Header="_Add">
+                <MenuItem Header="_Import File..." Click="AddFile" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
+                <MenuItem Header="Create New Folder..." Click="CreateFolder" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
             </MenuItem>
         </Menu>
         <!-- Breadcrumbs bar -->
