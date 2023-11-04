@@ -3,6 +3,7 @@ using Ookii.Dialogs.Wpf;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -187,6 +188,7 @@ namespace ZapExplorer.ApplicationLayer
         {
             _zapFileService.SaveArchive(ZapArchive, ZapArchive.Origin);
             _addFileService.RefreshFolder();
+            MessageBox.Show("Saving Complete");
         }
 
         private void SaveFileAs(object sender, RoutedEventArgs e)
@@ -206,6 +208,7 @@ namespace ZapExplorer.ApplicationLayer
                 Title = fi.Name;
                 _zapFileService.SaveArchive(ZapArchive, saveFileDialog.FileName);
                 _addFileService.RefreshFolder();
+                MessageBox.Show("Saving Complete");
             }
         }
 
