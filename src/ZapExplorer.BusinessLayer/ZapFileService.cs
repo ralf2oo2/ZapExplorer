@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text;
 using ZapExplorer.BusinessLayer.Models;
@@ -19,15 +20,34 @@ namespace ZapExplorer.BusinessLayer
         }
         public void SaveArchive(ZapArchive archive, string path)
         {
-            byte[] header = CreateHeader(archive);
+            ZapArchive clonedArchive = Utility.DeepClone(archive);
+            byte[] header = CreateHeader(clonedArchive);
+            clonedArchive.Items = FlattenDirectory(clonedArchive.Items);
+
             using (var fs = new FileStream(path, FileMode.Create))
             {
                 fs.Write(header, 0, header.Length);
+                foreach(var item in clonedArchive.Items.Where(x => x is FileItem && x.Size > 0))
+                {
+                    using (var originFs = new FileStream(((FileItem)item).Origin, FileMode.Open))
+                    {
+                        byte[] fileBytes = new byte[((FileItem)item).Size];
+                        originFs.Seek((int)((FileItem)item).StartPos, SeekOrigin.Begin);
+                        originFs.Read(fileBytes, 0, fileBytes.Length);
+                        fs.Write(fileBytes, 0, fileBytes.Length);
+                        int remainingPadding = (int)GetPadding(((FileItem)item).Size, clonedArchive.PaddingSize) - ((FileItem)item).Size;
+                        for(int i = 0; i < remainingPadding; i++)
+                        {
+                            fs.WriteByte(0x0);
+                        }
+                        Debug.WriteLine(fs.Position);
+                    }
+                }
             }
         }
-        private byte[] CreateHeader(ZapArchive archive)
+        private byte[] CreateHeader(ZapArchive clonedArchive)
         {
-            ZapArchive clonedArchive = Utility.DeepClone(archive);
+            //ZapArchive clonedArchive = Utility.DeepClone(archive);
 
             List<byte> headerBytes = new List<byte>();
             clonedArchive.SortItems();
@@ -160,6 +180,7 @@ namespace ZapExplorer.BusinessLayer
                     else
                     {
                         currentItem = new FileItem(System.Text.Encoding.Default.GetString(nameBytes).TrimEnd('\0'));
+                        ((FileItem)currentItem).Origin = path;
                     }
 
                     currentItem.Size = BitConverter.ToInt32(new byte[] { itemInfo[2], itemInfo[3], itemInfo[4], itemInfo[5] });
@@ -181,19 +202,27 @@ namespace ZapExplorer.BusinessLayer
                     itemCount--;
                 }
                 long prevFileEnd = fs.Position + 2;
-                foreach(Item item in archive.Items)
-                {
-                    if (item.Size == 0 || item is DirectoryItem)
-                        continue;
-                    ((FileItem)item).StartPos = GetPadding(prevFileEnd, paddingSize);
-                    prevFileEnd = ((FileItem)item).StartPos + item.Size;
-                    ((FileItem)item).EndPos = prevFileEnd;
-                    Debug.WriteLine("Size: " + item.Size);
-                    Debug.WriteLine("StartPos: " + ((FileItem)item).StartPos + " EndPos: " + ((FileItem)item).EndPos);
-                }
-
+                GetPositions(archive.Items, prevFileEnd, paddingSize);
             }
             return archive;
+        }
+        private long GetPositions(ObservableCollection<Item> items, long startPos, int paddingSize)
+        {
+            long prevFileEnd = startPos;
+            foreach(Item item in items)
+            {
+                if(item is DirectoryItem)
+                {
+                    prevFileEnd = GetPositions(((DirectoryItem)item).Items, prevFileEnd, paddingSize);
+                }
+                if (item.Size == 0)
+                    continue;
+                ((FileItem)item).StartPos = GetPadding(prevFileEnd, paddingSize);
+                prevFileEnd = ((FileItem)item).StartPos + item.Size;
+                ((FileItem)item).EndPos = prevFileEnd;
+
+            }
+            return prevFileEnd;
         }
     }
 }

@@ -28,6 +28,7 @@ namespace ZapExplorer.BusinessLayer
             fileItem.Origin = path;
             fileItem.StartPos = 0;
             fileItem.EndPos = fi.Length;
+            fileItem.Size = (int)fi.Length;
             return fileItem;
 
         }
