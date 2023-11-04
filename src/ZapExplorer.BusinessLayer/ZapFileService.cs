@@ -26,10 +26,12 @@ namespace ZapExplorer.BusinessLayer
         }
         private byte[] CreateHeader(ZapArchive archive)
         {
-            List<byte> headerBytes = new List<byte>();
-            archive.SortItems();
+            ZapArchive clonedArchive = (ZapArchive)archive.Clone();
 
-            List<Item> items = new List<Item>(archive.Items);
+            List<byte> headerBytes = new List<byte>();
+            clonedArchive.SortItems();
+
+            List<Item> items = new List<Item>(clonedArchive.Items);
 
             foreach (Item item in items)
             {
@@ -43,13 +45,13 @@ namespace ZapExplorer.BusinessLayer
             headerBytes.AddRange(new byte[] { (byte)'Z', (byte)'A', (byte)'P' , 0x0});
 
             // Adding padding size
-            headerBytes.AddRange(BitConverter.GetBytes(archive.PaddingSize));
+            headerBytes.AddRange(BitConverter.GetBytes(clonedArchive.PaddingSize));
 
             // Adding temporary value for count
             headerBytes.AddRange(BitConverter.GetBytes(items.Count));
 
             // Adding unknown value;
-            headerBytes.AddRange(BitConverter.GetBytes(archive.UnknownValue));
+            headerBytes.AddRange(BitConverter.GetBytes(clonedArchive.UnknownValue));
             foreach(Item item in items)
             {
                 // Adding unknown bytes, maybe it marks the start of an item?
@@ -76,7 +78,7 @@ namespace ZapExplorer.BusinessLayer
                 headerBytes.Add(0x0);
             }
             headerBytes.AddRange(new byte[] { 0x0d, 0x0a });
-            int totalPadding = (int)GetPadding(headerBytes.Count, archive.PaddingSize);
+            int totalPadding = (int)GetPadding(headerBytes.Count, clonedArchive.PaddingSize);
 
             while(headerBytes.Count < totalPadding)
             {
