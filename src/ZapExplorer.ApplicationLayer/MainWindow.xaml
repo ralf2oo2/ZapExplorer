@@ -7,7 +7,7 @@
         xmlns:converters="clr-namespace:ZapExplorer.ApplicationLayer.Converters"
         xmlns:Models="clr-namespace:ZapExplorer.BusinessLayer.Models;assembly=ZapExplorer.BusinessLayer"
         mc:Ignorable="d"
-        Title="ZapEdit" Height="450" Width="800" Closing="WindowClosing">
+        Title="ZapEdit" Height="450" Width="800" Closing="WindowClosing" Icon="icon.ico">
     <Window.Resources>
         <DrawingImage x:Key="arrow">
             <DrawingImage.Drawing>
@@ -30,24 +30,26 @@
         <converters:FileSizeVisibilityValueConverter x:Key="FileSizeVisibilityValueConverter"/>
         <converters:OpenFileActionsValueConverter x:Key="OpenFileActionsValueConverter"/>
         <converters:CanSaveValueConverter x:Key="CanSaveValueConverter"/>
+        <converters:ExportVisibilityValueConverter x:Key="ExportVisibilityValueConverter"/>
     </Window.Resources>
-    <Grid Background="#2b3355">
+    <Grid Background="#3d4876">
         <Grid.RowDefinitions>
             <RowDefinition Height="20px"/>
             <RowDefinition Height="20px"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="20px"/>
         </Grid.RowDefinitions>
-        <Menu>
+        <Menu Background="#3d4876" Foreground="White">
             <MenuItem Header="_File">
-                <MenuItem Header="_New..." Click="NewFile"/>
-                <MenuItem Header="_Open..." Click="OpenFile"/>
-                <MenuItem Header="_Save" Click="SaveFile" IsEnabled="{Binding ZapArchive, Converter={StaticResource CanSaveValueConverter}}"/>
-                <MenuItem Header="_Save As..." Click="SaveFileAs" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
+                <MenuItem Header="_New..." Click="NewFile" Foreground="Black"/>
+                <MenuItem Header="_Open..." Click="OpenFile" Foreground="Black"/>
+                <MenuItem Header="_Save" Click="SaveFile" Foreground="Black" IsEnabled="{Binding ZapArchive, Converter={StaticResource CanSaveValueConverter}}"/>
+                <MenuItem Header="_Save As..." Click="SaveFileAs" Foreground="Black" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
+                <MenuItem Header="_Export..." Click="ExportArchive" Foreground="Black" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
             </MenuItem>
             <MenuItem Header="_Add">
-                <MenuItem Header="_Import File..." Click="AddFile" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
-                <MenuItem Header="Create New Folder..." Click="CreateFolder" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
+                <MenuItem Header="_Import File..." Click="AddFile" Foreground="Black" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
+                <MenuItem Header="Create New Folder..." Click="CreateFolder" Foreground="Black" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
             </MenuItem>
         </Menu>
         <!-- Breadcrumbs bar -->
@@ -128,6 +130,12 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid>
+                        <Grid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Tag="{Binding}" Click="DeleteItem" Header="_Delete"/>
+                                <MenuItem Tag="{Binding}" Click="ExportItem" Visibility="{Binding ., Converter={StaticResource ExportVisibilityValueConverter}}" Header="_Export..."/>
+                            </ContextMenu>
+                        </Grid.ContextMenu>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="16px"/>
                             <ColumnDefinition Width="1*"/>

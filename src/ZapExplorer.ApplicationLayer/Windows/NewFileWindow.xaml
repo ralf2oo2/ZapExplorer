@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ZapExplorer.ApplicationLayer.Windows"
         mc:Ignorable="d"
-        Title="New File" Height="150" Width="300" ResizeMode="NoResize">
+        Title="New File" Height="150" Width="300" ResizeMode="NoResize" Background="#232A46">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -17,7 +17,7 @@
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
-        <TextBlock Text="Offset Size" Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <TextBlock Text="Offset Size" Foreground="White" Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <TextBox x:Name="tbxOffset" DataObject.Pasting="tbxOffset_Pasting" PreviewTextInput="tbxOffset_PreviewTextInput" Text="4096" Grid.ColumnSpan="2" Grid.Row="2" Margin="10,3,10,3"/>
         <Button Content="Create" Grid.Row="3" Margin="10,3,10,3" Click="Create"/>
         <Button Content="Cancel" Grid.Row="3" Grid.Column="1" Margin="10,3,10,3" Click="Cancel"/>

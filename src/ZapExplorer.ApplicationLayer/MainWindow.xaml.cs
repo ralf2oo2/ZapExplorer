@@ -1,23 +1,15 @@
 ﻿using Microsoft.Win32;
+using Ookii.Dialogs.Wpf;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ZapExplorer.ApplicationLayer.Windows;
 using ZapExplorer.BusinessLayer;
 using ZapExplorer.BusinessLayer.Models;
@@ -62,6 +54,15 @@ namespace ZapExplorer.ApplicationLayer
 
         public MainWindow()
         {
+            bool exists = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetEntryAssembly().Location)).Count() > 1;
+            if (!exists)
+            {
+                DirectoryInfo dir = new DirectoryInfo(AddFileService.FILES_PATH);
+                if (dir.Exists)
+                {
+                    dir.Delete(true);
+                }
+            }
             InitializeComponent();
             DataContext = this;
             _zapFileService = new ZapFileService();
@@ -146,6 +147,7 @@ namespace ZapExplorer.ApplicationLayer
                         CurrentDirectory.Items.Add(_addFileService.AddFile(file));
                     }
                 }
+                ZapArchive.SortItems();
             }
         }
         private void CreateFolder(object sender, RoutedEventArgs e)
@@ -163,6 +165,7 @@ namespace ZapExplorer.ApplicationLayer
                 {
                     CurrentDirectory.Items.Add(directoryItem);
                 }
+                ZapArchive.SortItems();
             }
         }
 
@@ -239,8 +242,49 @@ namespace ZapExplorer.ApplicationLayer
             }
         }
 
+        private void DeleteItem(object sender, RoutedEventArgs e)
+        {
+            ZapArchive.Items.Remove((Item)((MenuItem)sender).Tag);
+            _addFileService.UnsavedProgress = true;
+        }
+
+        private void ExportItem(object sender, RoutedEventArgs e)
+        {
+            FileItem fileItem = (FileItem)((MenuItem)sender).Tag;
+
+            FileInfo fi = new FileInfo(fileItem.Name);
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Title = "Export file";
+            saveFileDialog.DefaultExt = fi.Extension;
+            saveFileDialog.FileName = fi.Name;
+            saveFileDialog.Filter = "All files (*.*)|*.*";
+            saveFileDialog.FilterIndex = 0;
+            saveFileDialog.RestoreDirectory = true;
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                _zapFileService.ExportItem(fileItem, saveFileDialog.FileName);
+            }
+        }
+
+        private void ExportArchive(object sender, RoutedEventArgs e)
+        {
+            VistaFolderBrowserDialog vistaFolderBrowserDialog = new VistaFolderBrowserDialog();
+            vistaFolderBrowserDialog.Description = "Select folder";
+            vistaFolderBrowserDialog.ShowNewFolderButton = true;
+
+            if (vistaFolderBrowserDialog.ShowDialog() == true)
+            {
+                _zapFileService.ExportArchive(ZapArchive, vistaFolderBrowserDialog.SelectedPath + @"\");
+            }
+        }
+
         private void OnItemMouseDoubleClick(object sender, RoutedEventArgs e)
         {
+            MouseEventArgs mouseEventArgs = (MouseEventArgs)e;
+            if (mouseEventArgs.LeftButton != MouseButtonState.Pressed)
+                return;
             ListBox? listBox = sender as ListBox;
             if(listBox.SelectedItem is DirectoryItem)
             {

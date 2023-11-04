@@ -1,8 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using ZapExplorer.BusinessLayer.Models;
 
@@ -18,9 +20,61 @@ namespace ZapExplorer.BusinessLayer
                 result += padding;
             return result;
         }
+
+        public void ExportItem(FileItem item, string path)
+        {
+            try
+            {
+                FileAttributes fa = File.GetAttributes(path);
+                if (fa.HasFlag(FileAttributes.Directory))
+                {
+                    path += item.Name;
+                }
+            }
+            catch(Exception){ }
+            using (var fs = new FileStream(path, FileMode.Create))
+            {
+                using (var originfs = new FileStream(item.Origin, FileMode.Open))
+                {
+                    byte[] fileBytes = new byte[item.Size];
+                    originfs.Seek(item.StartPos, SeekOrigin.Begin);
+                    originfs.Read(fileBytes, 0, fileBytes.Length);
+                    fs.Write(fileBytes, 0, fileBytes.Length);
+                }
+            }
+        }
+
+        public void ExportArchive(ZapArchive archive, string path)
+        {
+            foreach(var item in archive.Items)
+            {
+                if (item is DirectoryItem)
+                    ExportFolder((DirectoryItem)item, path);
+                else
+                    ExportItem((FileItem)item, path);
+            }
+        }
+
+        public void ExportFolder(DirectoryItem directoryItem, string path)
+        {
+            path = @$"{path}{directoryItem.Name}\";
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            foreach (Item item in directoryItem.Items)
+            {
+                if (item is DirectoryItem)
+                    ExportFolder((DirectoryItem)item, path);
+                else
+                    ExportItem((FileItem)item, path);
+            }
+        }
+
         public void SaveArchive(ZapArchive archive, string path)
         {
             ZapArchive clonedArchive = Utility.DeepClone(archive);
+            clonedArchive.SortItems();
             byte[] header = CreateHeader(clonedArchive);
             clonedArchive.Items = FlattenDirectory(clonedArchive.Items);
 
@@ -47,7 +101,6 @@ namespace ZapExplorer.BusinessLayer
                         {
                             fs.WriteByte(0x0);
                         }
-                        Debug.WriteLine(fs.Position);
                     }
                 }
             }
