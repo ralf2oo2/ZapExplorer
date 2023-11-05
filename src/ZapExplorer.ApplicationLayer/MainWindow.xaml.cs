@@ -247,7 +247,10 @@ namespace ZapExplorer.ApplicationLayer
 
         private void DeleteItem(object sender, RoutedEventArgs e)
         {
-            ZapArchive.Items.Remove((Item)((MenuItem)sender).Tag);
+            if(CurrentDirectory == null)
+                ZapArchive.Items.Remove((Item)((MenuItem)sender).Tag);
+            else
+                CurrentDirectory.Items.Remove((Item)((MenuItem)sender).Tag);
             _addFileService.UnsavedProgress = true;
         }
 
