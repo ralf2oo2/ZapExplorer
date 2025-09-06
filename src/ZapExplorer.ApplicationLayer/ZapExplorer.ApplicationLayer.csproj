@@ -36,4 +36,10 @@
       <None Remove="Assets\folder.png" />
       <AvaloniaResource Include="Assets\folder.png" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Avalonia.Themes.Simple">
+        <HintPath>..\..\..\..\.nuget\packages\avalonia.themes.simple\11.3.5\lib\net8.0\Avalonia.Themes.Simple.dll</HintPath>
+      </Reference>
+    </ItemGroup>
 </Project>
