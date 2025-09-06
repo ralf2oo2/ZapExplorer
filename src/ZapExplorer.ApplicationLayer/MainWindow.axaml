@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:ZapExplorer.ApplicationLayer.Converters"
+        xmlns:models="clr-namespace:ZapExplorer.BusinessLayer.Models;assembly=ZapExplorer.BusinessLayer"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="ZapExplorer.ApplicationLayer.MainWindow"
         x:CompileBindings="False"
@@ -85,7 +86,7 @@
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
+                                        <DataTemplate DataType="models:DirectoryItem">
                                             <Button Content="{Binding Name}" Theme="{StaticResource linkButton}" Tag="{Binding}" Click="ChangeDirectory">
                                                 <Button.Template>
                                                     <ControlTemplate TargetType="Button">
@@ -128,7 +129,7 @@
                         </ControlTheme>
                     </ListBox.ItemContainerTheme>
                     <ListBox.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate DataType="models:Item">
                             <Grid>
                                 <Grid.ContextMenu>
                                     <ContextMenu>

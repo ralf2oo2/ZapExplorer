@@ -58,8 +58,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 dir.Delete(true);
             }
         }
+        ZapArchive = new ZapArchive();
+        ZapArchive.Items.Add(new FileItem("Kool Aid"));
+        ZapArchive.Items.Add(new DirectoryItem("Kool Aid"));
         InitializeComponent();
         DataContext = this;
+        
         _zapFileService = new ZapFileService();
         _addFileService = new AddFileService();
         BreadCrumbsBar = new ObservableCollection<DirectoryItem>();
