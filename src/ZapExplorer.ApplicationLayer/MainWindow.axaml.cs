@@ -38,6 +38,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         get { return _zapArchive; }
         set { _zapArchive = value; OnPropertyChanged(nameof(ZapArchive)); }
     }
+    
+    private Item? _selectedItem;
+
+    public Item? SelectedItem
+    {
+        get { return _selectedItem; }
+        set { _selectedItem = value; OnPropertyChanged(nameof(SelectedItem)); }
+    }
 
     private ObservableCollection<DirectoryItem> _breadCrumbsBar;
 
@@ -57,10 +65,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             {
                 dir.Delete(true);
             }
-        }
-        ZapArchive = new ZapArchive();
-        ZapArchive.Items.Add(new FileItem("Kool Aid"));
-        ZapArchive.Items.Add(new DirectoryItem("Kool Aid"));
+        } ;
         InitializeComponent();
         DataContext = this;
         
@@ -292,6 +297,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 _zapFileService.ExportArchive(ZapArchive, folder + @"\");
             }
         }
+
 
         private void OnItemMouseDoubleClick(object? sender, TappedEventArgs e)
         {

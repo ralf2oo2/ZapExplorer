@@ -14,7 +14,7 @@ namespace ZapExplorer.ApplicationLayer.Converters
                 return null;
 
             ZapArchive archive = (ZapArchive)values[0];
-            if (values[1] != null && values[1] is ZapArchive)
+            if (values[1] != null && values[1] is DirectoryItem)
             {
                 return ((DirectoryItem)values[1]).Items;
             }

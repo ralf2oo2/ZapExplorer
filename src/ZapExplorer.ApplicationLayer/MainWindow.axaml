@@ -31,6 +31,7 @@
                 <converters:OpenFileActionsValueConverter x:Key="OpenFileActionsValueConverter"/>
                 <converters:CanSaveValueConverter x:Key="CanSaveValueConverter"/>
                 <converters:ExportVisibilityValueConverter x:Key="ExportVisibilityValueConverter"/>
+                <converters:SelectedEnabledValueConverter x:Key="SelectedEnabledValueConverter"/>
         </Window.Resources>
         <Grid Background="#3d4876">
                 <Grid.RowDefinitions>
@@ -51,6 +52,10 @@
                                 <MenuItem Header="_Import File..." Click="AddFile" Foreground="Black" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
                                 <MenuItem Header="Create New Folder..." Click="CreateFolder" Foreground="Black" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
                         </MenuItem>
+                        <MenuItem Header="_Selected" IsEnabled="{Binding SelectedItem, Converter={StaticResource SelectedEnabledValueConverter}}">
+                            <MenuItem Foreground="Black" Tag="{Binding SelectedItem}" Click="DeleteItem" Header="_Delete"/>
+                            <MenuItem Foreground="Black" Tag="{Binding SelectedItem}" Click="ExportItem" IsVisible="{Binding SelectedItem, Converter={StaticResource ExportVisibilityValueConverter}}" Header="_Export..."/>
+                        </MenuItem>
                 </Menu>
                 
                 <!-- Breadcrumbs bar -->
@@ -63,7 +68,9 @@
                     <Button Click="Return">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
-                                <Image Source="{StaticResource arrow}"/>
+                                <Border Background="Transparent" BorderThickness="0">
+                                    <Image Source="{StaticResource arrow}"/>
+                                </Border>
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
@@ -74,7 +81,9 @@
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <TextBlock>
-                                        <ContentPresenter />
+                                                <ContentPresenter 
+                                                    Content="{TemplateBinding Content}" 
+                                                    ContentTemplate="{TemplateBinding ContentTemplate}" />
                                             </TextBlock>
                                         </ControlTemplate>
                                     </Button.Template>
@@ -97,7 +106,9 @@
                                                             </Grid.ColumnDefinitions>
                                                             <TextBlock Text=" >"/>
                                                             <TextBlock Grid.Column="1">
-                                                                <ContentPresenter />
+                                                                <ContentPresenter 
+                                                                    Content="{TemplateBinding Content}" 
+                                                                    ContentTemplate="{TemplateBinding ContentTemplate}" />
                                                             </TextBlock>
                                                         </Grid>
                                                     </ControlTemplate>
@@ -111,12 +122,27 @@
                     </Border>
                 </Grid>
                 <!-- File explorer -->
-                <ListBox Background="#232A46" DoubleTapped="OnItemMouseDoubleClick" Grid.Row="2">
-                    <ListBox.Theme>
-                        <ControlTheme TargetType="ListBox">
+                <ListBox Background="#232A46" DoubleTapped="OnItemMouseDoubleClick" Grid.Row="2" SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+                    <!-- <ListBox.Theme> -->
+                    <!--     <ControlTheme TargetType="ListBox"> -->
+                    <!--         <Setter Property="BorderThickness" Value="0"/> -->
+                    <!--     </ControlTheme> -->
+                    <!-- </ListBox.Theme> -->
+                    <ListBox.Styles>
+                        <Style Selector="ListBox">
                             <Setter Property="BorderThickness" Value="0"/>
-                        </ControlTheme>
-                    </ListBox.Theme>
+                        </Style>
+                        <Style Selector="ListBoxItem:pointerover">
+                            <Setter Property="Background" Value="#244669"/>
+                        </Style>
+                        <Style Selector="ListBoxItem:selected">
+                            <Setter Property="Background" Value="#244669"/>
+                            <Setter Property="BorderBrush" Value="#26a8da"/>
+                        </Style>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="BorderThickness" Value="1"/>
+                        </Style>
+                    </ListBox.Styles>
                     <ListBox.ItemsSource>
                         <MultiBinding Converter="{StaticResource DirectoryMultiConverter}">
                             <Binding Path="ZapArchive"/>
@@ -126,17 +152,18 @@
                     <ListBox.ItemContainerTheme>
                         <ControlTheme TargetType="{x:Type ListBoxItem}">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="ContextMenu">
+                                <Setter.Value>
+                                    <ContextMenu Background="White" Foreground="Black" BorderBrush="Black" BorderThickness="100">
+                                        
+                                    </ContextMenu>
+                                </Setter.Value>
+                            </Setter>
                         </ControlTheme>
                     </ListBox.ItemContainerTheme>
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="models:Item">
-                            <Grid>
-                                <Grid.ContextMenu>
-                                    <ContextMenu>
-                                        <MenuItem Tag="{Binding}" Click="DeleteItem" Header="_Delete"/>
-                                        <MenuItem Tag="{Binding}" Click="ExportItem" IsVisible="{Binding ., Converter={StaticResource ExportVisibilityValueConverter}}" Header="_Export..."/>
-                                    </ContextMenu>
-                                </Grid.ContextMenu>
+                            <Grid Background="Transparent">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="16"/>
                                     <ColumnDefinition Width="1*"/>
@@ -150,5 +177,18 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                <!-- <ListBox Grid.Row="2"> -->
+                <!--     <ListBox.ItemsSource> -->
+                <!--         <MultiBinding Converter="{StaticResource DirectoryMultiConverter}"> -->
+                <!--             <Binding Path="ZapArchive"/> -->
+                <!--             <Binding Path="CurrentDirectory" UpdateSourceTrigger="PropertyChanged"/> -->
+                <!--         </MultiBinding> -->
+                <!--     </ListBox.ItemsSource> -->
+                <!--     <ListBox.Theme> -->
+                <!--         <ControlTheme TargetType="ListBox"> -->
+                <!--             <Setter Property="BorderThickness" Value="0"/> -->
+                <!--         </ControlTheme> -->
+                <!--     </ListBox.Theme> -->
+                <!-- </ListBox> -->
         </Grid>
 </Window>
