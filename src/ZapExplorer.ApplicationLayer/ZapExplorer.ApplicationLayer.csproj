@@ -3,7 +3,9 @@
         <OutputType>WinExe</OutputType>
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <PublishAot>true</PublishAot>
+        <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+        <TrimMode>link</TrimMode>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     </PropertyGroup>
@@ -12,6 +14,7 @@
         <PackageReference Include="Avalonia" Version="11.3.5"/>
         <PackageReference Include="Avalonia.Desktop" Version="11.3.5"/>
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.5"/>
+        <PackageReference Include="Avalonia.Themes.Simple" Version="11.3.5"/>
         <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.5"/>
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
         <PackageReference Include="Avalonia.Diagnostics" Version="11.3.5">
@@ -25,6 +28,12 @@
     </ItemGroup>
 
     <ItemGroup>
+        <!-- Preserve Avalonia types for reflection -->
+        <TrimmerRootAssembly Include="Avalonia.Themes.Fluent" />
+        <TrimmerRootAssembly Include="Avalonia.Themes.Simple" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\ZapExplorer.BusinessLayer\ZapExplorer.BusinessLayer.csproj" />
     </ItemGroup>
 
@@ -35,11 +44,5 @@
       <AvaloniaResource Include="Assets\file.png" />
       <None Remove="Assets\folder.png" />
       <AvaloniaResource Include="Assets\folder.png" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="Avalonia.Themes.Simple">
-        <HintPath>..\..\..\..\.nuget\packages\avalonia.themes.simple\11.3.5\lib\net8.0\Avalonia.Themes.Simple.dll</HintPath>
-      </Reference>
     </ItemGroup>
 </Project>
