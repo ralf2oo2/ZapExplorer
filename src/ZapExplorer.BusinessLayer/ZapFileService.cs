@@ -28,7 +28,7 @@ namespace ZapExplorer.BusinessLayer
                 FileAttributes fa = File.GetAttributes(path);
                 if (fa.HasFlag(FileAttributes.Directory))
                 {
-                    path += item.Name;
+                    path = Path.Combine(path, item.Name);
                 }
             }
             catch(Exception){ }
@@ -57,7 +57,7 @@ namespace ZapExplorer.BusinessLayer
 
         public void ExportFolder(DirectoryItem directoryItem, string path)
         {
-            path = @$"{path}{directoryItem.Name}\";
+            path = Path.Combine(path, directoryItem.Name);
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
@@ -82,7 +82,7 @@ namespace ZapExplorer.BusinessLayer
             if(File.Exists(path))
             {
                 FileInfo fi = new FileInfo(path);
-                savePath = $"{AddFileService.FILES_PATH}/{fi.Name}";
+                savePath = Path.Combine(AddFileService.FILES_PATH, fi.Name);
             }
 
             using (var fs = new FileStream(savePath, FileMode.Create))

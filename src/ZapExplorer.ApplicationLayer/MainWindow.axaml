@@ -7,7 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="ZapExplorer.ApplicationLayer.MainWindow"
         x:CompileBindings="False"
-        Title="ZapExplorer" Height="450" Width="800"  Icon="icon.ico">
+        Title="ZapExplorer" Height="450" Width="800" MinHeight="225" MinWidth="400"  Icon="icon.ico">
         <Window.Resources>
                 <DrawingImage x:Key="arrow">
                         <DrawingImage.Drawing>
@@ -16,14 +16,14 @@
                                 </DrawingGroup>
                         </DrawingImage.Drawing>
                 </DrawingImage>
-                <ControlTheme x:Key="linkButton" TargetType="Button">
-                        <Setter Property="Foreground" Value="White" />
-                        <Interaction.Behaviors>
-                                <EventTriggerBehavior EventName="IsMouseOver">
-                                        <ChangePropertyAction PropertyName="Foreground" Value="LightGray" />
-                                </EventTriggerBehavior>
-                        </Interaction.Behaviors>
-                </ControlTheme>
+                <!-- <ControlTheme x:Key="linkButton" TargetType="Button"> -->
+                <!--         <Setter Property="Foreground" Value="White" /> -->
+                <!--         <Interaction.Behaviors> -->
+                <!--                 <EventTriggerBehavior EventName="IsMouseOver"> -->
+                <!--                         <ChangePropertyAction PropertyName="Foreground" Value="LightGray" /> -->
+                <!--                 </EventTriggerBehavior> -->
+                <!--         </Interaction.Behaviors> -->
+                <!-- </ControlTheme> -->
                 <converters:DirectoryItemMultiConverter x:Key="DirectoryMultiConverter"/>
                 <converters:FileIconValueConverter x:Key="FileIconValueConverter"/>
                 <converters:FileSizeNotationValueConverter x:Key="FileSizeNotationValueConverter"/>
@@ -78,13 +78,23 @@
                         <ScrollViewer VerticalScrollBarVisibility="Hidden">
                             <StackPanel Orientation="Horizontal">
                                 <Button Content="Root" Tag="root" Theme="{StaticResource linkButton}" Click="ChangeDirectory" Grid.Column="1">
+                                    <Button.Styles>
+                                        <Style Selector="Button:pointerover">
+                                            <Setter Property="Foreground" Value="LightGray"/>
+                                        </Style>
+                                        <Style Selector="Button">
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Style>
+                                    </Button.Styles>
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <TextBlock>
-                                                <ContentPresenter 
-                                                    Content="{TemplateBinding Content}" 
-                                                    ContentTemplate="{TemplateBinding ContentTemplate}" />
-                                            </TextBlock>
+                                            <Border BorderThickness="0" Background="Transparent">
+                                                <TextBlock>
+                                                    <ContentPresenter 
+                                                        Content="{TemplateBinding Content}" 
+                                                        ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                                </TextBlock>
+                                            </Border>
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
@@ -97,9 +107,17 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="models:DirectoryItem">
                                             <Button Content="{Binding Name}" Theme="{StaticResource linkButton}" Tag="{Binding}" Click="ChangeDirectory">
+                                                <Button.Styles>
+                                                    <Style Selector="Button:pointerover">
+                                                        <Setter Property="Foreground" Value="LightGray"/>
+                                                    </Style>
+                                                    <Style Selector="Button">
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </Style>
+                                                </Button.Styles>
                                                 <Button.Template>
                                                     <ControlTemplate TargetType="Button">
-                                                        <Grid>
+                                                        <Grid Background="Transparent">
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="14"/>
                                                                 <ColumnDefinition Width="auto"/>
@@ -108,7 +126,7 @@
                                                             <TextBlock Grid.Column="1">
                                                                 <ContentPresenter 
                                                                     Content="{TemplateBinding Content}" 
-                                                                    ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                                                    ContentTemplate="{TemplateBinding ContentTemplate}"/>
                                                             </TextBlock>
                                                         </Grid>
                                                     </ControlTemplate>
@@ -122,12 +140,7 @@
                     </Border>
                 </Grid>
                 <!-- File explorer -->
-                <ListBox Background="#232A46" DoubleTapped="OnItemMouseDoubleClick" Grid.Row="2" SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
-                    <!-- <ListBox.Theme> -->
-                    <!--     <ControlTheme TargetType="ListBox"> -->
-                    <!--         <Setter Property="BorderThickness" Value="0"/> -->
-                    <!--     </ControlTheme> -->
-                    <!-- </ListBox.Theme> -->
+                <ListBox Background="#232A46" DoubleTapped="OnItemMouseDoubleClick" Grid.Row="2" SelectedItem="{Binding SelectedItem, Mode=OneWayToSource}">
                     <ListBox.Styles>
                         <Style Selector="ListBox">
                             <Setter Property="BorderThickness" Value="0"/>
@@ -145,8 +158,8 @@
                     </ListBox.Styles>
                     <ListBox.ItemsSource>
                         <MultiBinding Converter="{StaticResource DirectoryMultiConverter}">
-                            <Binding Path="ZapArchive"/>
-                            <Binding Path="CurrentDirectory" UpdateSourceTrigger="PropertyChanged"/>
+                            <Binding Path="ZapArchive" Mode="OneWay"/>
+                            <Binding Path="CurrentDirectory"  Mode="OneWay" UpdateSourceTrigger="PropertyChanged"/>
                         </MultiBinding>
                     </ListBox.ItemsSource>
                     <ListBox.ItemContainerTheme>

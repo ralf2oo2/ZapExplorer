@@ -232,6 +232,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 CurrentDirectory = null;
                 return;
             }
+
+            CurrentDirectory = null;
             CurrentDirectory = BreadCrumbsBar.Last();
         }
         private void ChangeDirectory(object sender, RoutedEventArgs e)
@@ -294,7 +296,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
             if (folder != null)
             {
-                _zapFileService.ExportArchive(ZapArchive, folder + @"\");
+                _zapFileService.ExportArchive(ZapArchive, Uri.UnescapeDataString(folder.First().Path.AbsolutePath));
             }
         }
 

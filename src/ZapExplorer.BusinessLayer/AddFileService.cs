@@ -16,9 +16,12 @@ namespace ZapExplorer.BusinessLayer
         public AddFileService()
         {
             GenUuid();
-            if (!Directory.Exists($"{FILES_PATH}/{Uuid}"))
+            
+            string path = Path.Combine(FILES_PATH, Uuid);
+            
+            if (!Directory.Exists(path))
             {
-                Directory.CreateDirectory($"{FILES_PATH}/{Uuid}");
+                Directory.CreateDirectory(path);
             }
         }
 
@@ -31,7 +34,7 @@ namespace ZapExplorer.BusinessLayer
         {
             UnsavedProgress = true;
             FileInfo fi = new FileInfo(path);
-            File.Copy(path, $"{FILES_PATH}/{Uuid}/{fi.Name}", true);
+            File.Copy(path, Path.Combine(FILES_PATH, Uuid, fi.Name), true);
             FileItem fileItem = new FileItem(Path.GetFileName(path));
             fileItem.Origin = path;
             fileItem.StartPos = 0;
@@ -46,9 +49,10 @@ namespace ZapExplorer.BusinessLayer
             PurgeFolder();
             GenUuid();
             UnsavedProgress = false;
-            if (!Directory.Exists($"{FILES_PATH}/{Uuid}"))
+            string path = Path.Combine(FILES_PATH, Uuid);
+            if (!Directory.Exists(path))
             {
-                Directory.CreateDirectory($"{FILES_PATH}/{Uuid}");
+                Directory.CreateDirectory(path);
             }
         }
 
@@ -59,7 +63,7 @@ namespace ZapExplorer.BusinessLayer
 
         public void PurgeFolder()
         {
-            DirectoryInfo dir = new DirectoryInfo($"{FILES_PATH}/{Uuid}");
+            DirectoryInfo dir = new DirectoryInfo(Path.Combine(FILES_PATH, Uuid));
             if(dir.Exists)
             {
                 dir.Delete(true);
