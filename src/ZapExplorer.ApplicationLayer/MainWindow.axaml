@@ -170,7 +170,7 @@
                                     <ColumnDefinition Width="auto"/>
                                     <ColumnDefinition Width="50"/>
                                 </Grid.ColumnDefinitions>
-                                <Image/>
+                                <Image Source="{Binding ., Converter={StaticResource FileIconValueConverter}}"/>
                                 <TextBlock Text="{Binding Name}" Margin="3,0,0,0" Foreground="White" Grid.Column="1"/>
                                 <TextBlock Text="{Binding Size, Converter={StaticResource FileSizeNotationValueConverter}}" IsVisible="{Binding ., Converter={StaticResource FileSizeVisibilityValueConverter}}" Foreground="White" Grid.Column="3"/>
                             </Grid>

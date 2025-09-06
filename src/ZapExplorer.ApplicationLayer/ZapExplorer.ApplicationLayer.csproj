@@ -29,11 +29,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Assets\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <None Remove="icon.ico" />
       <AvaloniaResource Include="icon.ico" />
+      <None Remove="Assets\file.png" />
+      <AvaloniaResource Include="Assets\file.png" />
+      <None Remove="Assets\folder.png" />
+      <AvaloniaResource Include="Assets\folder.png" />
     </ItemGroup>
 </Project>

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using Avalonia;
 using Avalonia.Data.Converters;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using ZapExplorer.BusinessLayer.Models;
 
 namespace ZapExplorer.ApplicationLayer.Converters
@@ -12,19 +15,20 @@ namespace ZapExplorer.ApplicationLayer.Converters
         {
             if (value is DirectoryItem)
             {
-                return null;
+                return LoadResourceAsBitmap("avares://ZapExplorer.ApplicationLayer/Assets/folder.png");
             }
-            else
-            {
-                return null;
-            }
-
-            return null;
+            return LoadResourceAsBitmap("avares://ZapExplorer.ApplicationLayer/Assets/file.png");;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
+        }
+
+        public Bitmap LoadResourceAsBitmap(string resourceName)
+        {
+            var uri = new Uri(resourceName);
+            return new Bitmap(AssetLoader.Open(uri));
         }
     }
 }
