@@ -78,7 +78,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             if (_addFileService.UnsavedProgress)
             {
-                var result = await MessageBox.ShowAsync("There are unsaved changes, Discard changes?", "Warning", MessageBoxIcon.None, MessageBoxButton.YesNo);
+                var result = await MessageBox.ShowAsync("There are unsaved changes, Discard changes?", "Warning", MessageBoxIcon.Warning, MessageBoxButton.YesNo);
                 if (!(result == MessageBoxResult.OK))
                 {
                     return;
@@ -102,7 +102,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             if (_addFileService.UnsavedProgress)
             {
-                var result = await MessageBox.ShowAsync("There are unsaved changes, Discard changes?", "Warning", MessageBoxIcon.None,MessageBoxButton.YesNo);
+                var result = await MessageBox.ShowAsync("There are unsaved changes, Discard changes?", "Warning", MessageBoxIcon.Warning,MessageBoxButton.YesNo);
                 if (!(result == MessageBoxResult.OK))
                 {
                     return;
@@ -123,7 +123,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             {
                 Title = "Select zap archive",
                 AllowMultiple = false,
-                FileTypeFilter = new [] {Types.Types.Zap}
+                FileTypeFilter = new [] {Types.Types.Zap},
             });
 
             if (files.Count >= 1)
@@ -178,21 +178,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 ZapArchive.SortItems();
             }
         }
-
-        private async void WindowClosing(object sender, CancelEventArgs e)
-        {
-            if(_addFileService.UnsavedProgress)
-            {
-                var result = await MessageBox.ShowAsync("There are unsaved changes, Do you want to quit?", "Warning", MessageBoxIcon.None, MessageBoxButton.YesNo);
-                if (!(result == MessageBoxResult.OK))
-                {
-                    e.Cancel = true;
-                    return;
-                }
-            }
-            _addFileService.PurgeFolder();
-        }
-
+        
         private async void SaveFile(object sender, RoutedEventArgs e)
         {
             _zapFileService.SaveArchive(ZapArchive, ZapArchive.Origin);
@@ -277,7 +263,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             {
                 Title = "Export file",
                 DefaultExtension = fi.Extension,
-                FileTypeChoices = new [] {Types.Types.Zap}
+                SuggestedFileName = fileItem.Name,
             });
 
             if (file != null)
@@ -316,5 +302,22 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        protected async override void OnClosing(WindowClosingEventArgs e)
+        {
+            if(_addFileService.UnsavedProgress)
+            {
+                e.Cancel = true;
+                var result = await MessageBox.ShowAsync("There is unsaved progress. Are you sure you want to quit?", "Warning", MessageBoxIcon.Warning, MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.Yes)
+                {
+                    _addFileService.UnsavedProgress = false;
+                    Close();
+                }
+            }
+            
+            _addFileService.PurgeFolder();
+            base.OnClosing(e);
         }
 }
