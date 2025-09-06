@@ -1,5 +1,4 @@
 using System;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -10,6 +9,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Ursa.Controls;
+using ZapExplorer.ApplicationLayer.ViewModels;
 using ZapExplorer.ApplicationLayer.Windows;
 using ZapExplorer.BusinessLayer;
 using ZapExplorer.BusinessLayer.Models;
@@ -20,40 +20,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 {
     private readonly ZapFileService _zapFileService;
     private readonly AddFileService _addFileService;
+    private readonly MainWindowViewModel _mainWindowViewModel;
     
     public event PropertyChangedEventHandler? PropertyChanged;
-    
-    private DirectoryItem? _currentDirectory;
-
-    public DirectoryItem? CurrentDirectory
-    {
-        get { return _currentDirectory; }
-        set { _currentDirectory = value; OnPropertyChanged(nameof(CurrentDirectory)); }
-    }
-
-    private ZapArchive? _zapArchive;
-
-    public ZapArchive? ZapArchive
-    {
-        get { return _zapArchive; }
-        set { _zapArchive = value; OnPropertyChanged(nameof(ZapArchive)); }
-    }
-    
-    private Item? _selectedItem;
-
-    public Item? SelectedItem
-    {
-        get { return _selectedItem; }
-        set { _selectedItem = value; OnPropertyChanged(nameof(SelectedItem)); }
-    }
-
-    private ObservableCollection<DirectoryItem> _breadCrumbsBar;
-
-    public ObservableCollection<DirectoryItem> BreadCrumbsBar
-    {
-        get { return _breadCrumbsBar; }
-        set { _breadCrumbsBar = value; OnPropertyChanged(nameof(BreadCrumbsBar)); }
-    }
     
     public MainWindow()
     {
@@ -65,13 +34,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             {
                 dir.Delete(true);
             }
-        } ;
+        };
+        
+        _mainWindowViewModel = new MainWindowViewModel();
         InitializeComponent();
-        DataContext = this;
+        DataContext = _mainWindowViewModel;
         
         _zapFileService = new ZapFileService();
         _addFileService = new AddFileService();
-        BreadCrumbsBar = new ObservableCollection<DirectoryItem>();
     }
     
     private async void NewFile(object sender, RoutedEventArgs e)
@@ -91,10 +61,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             {
                 Title = "New File";
                 _addFileService.RefreshFolder();
-                ZapArchive = new ZapArchive();
-                ZapArchive.PaddingSize = newFileWindow.PaddingSize;
-                CurrentDirectory = null;
-                BreadCrumbsBar.Clear();
+                _mainWindowViewModel.ZapArchive = new ZapArchive();
+                _mainWindowViewModel.ZapArchive.PaddingSize = newFileWindow.PaddingSize;
+                _mainWindowViewModel.CurrentDirectory = null;
+                _mainWindowViewModel.BreadCrumbsBar.Clear();
             }
         }
 
@@ -110,9 +80,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             }
 
             _addFileService.RefreshFolder();
-            ZapArchive = null;
-            CurrentDirectory = null;
-            BreadCrumbsBar.Clear();
+            _mainWindowViewModel.ZapArchive = null;
+            _mainWindowViewModel.CurrentDirectory = null;
+            _mainWindowViewModel.BreadCrumbsBar.Clear();
 
             Title = "ZapExplorer";
             
@@ -128,7 +98,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
             if (files.Count >= 1)
             {
-                ZapArchive = _zapFileService.GetArchive(Uri.UnescapeDataString(files.First().Path.AbsolutePath));
+                _mainWindowViewModel.ZapArchive = _zapFileService.GetArchive(Uri.UnescapeDataString(files.First().Path.AbsolutePath));
                 FileInfo fi = new FileInfo(Uri.UnescapeDataString(files.First().Path.AbsolutePath));
                 Title = fi.Name;
             }
@@ -149,13 +119,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             {
                 foreach (var file in files)
                 {
-                    if(CurrentDirectory == null)
+                    if(_mainWindowViewModel.CurrentDirectory == null)
                     {
-                        ZapArchive.Items.Add(_addFileService.AddFile(Uri.UnescapeDataString(file.Path.AbsolutePath)));
+                        _mainWindowViewModel.ZapArchive.Items.Add(_addFileService.AddFile(Uri.UnescapeDataString(file.Path.AbsolutePath)));
                     }
                     else
                     {
-                        CurrentDirectory.Items.Add(_addFileService.AddFile(Uri.UnescapeDataString(file.Path.AbsolutePath)));
+                        _mainWindowViewModel.CurrentDirectory.Items.Add(_addFileService.AddFile(Uri.UnescapeDataString(file.Path.AbsolutePath)));
                     }
                 }
             }
@@ -167,21 +137,21 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             if(createFolderWindow.Confirmed)
             {
                 DirectoryItem directoryItem = new DirectoryItem(createFolderWindow.FolderName);
-                if (CurrentDirectory == null)
+                if (_mainWindowViewModel.CurrentDirectory == null)
                 {
-                    ZapArchive.Items.Add(directoryItem);
+                    _mainWindowViewModel.ZapArchive.Items.Add(directoryItem);
                 }
                 else
                 {
-                    CurrentDirectory.Items.Add(directoryItem);
+                    _mainWindowViewModel.CurrentDirectory.Items.Add(directoryItem);
                 }
-                ZapArchive.SortItems();
+                _mainWindowViewModel.ZapArchive.SortItems();
             }
         }
         
         private async void SaveFile(object sender, RoutedEventArgs e)
         {
-            _zapFileService.SaveArchive(ZapArchive, ZapArchive.Origin);
+            _zapFileService.SaveArchive(_mainWindowViewModel.ZapArchive, _mainWindowViewModel.ZapArchive.Origin);
             _addFileService.RefreshFolder();
             await MessageBox.ShowAsync("Saving Complete");
         }
@@ -199,10 +169,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             if (file != null)
             {
                 FileInfo fi = new FileInfo(Uri.UnescapeDataString(file.Path.AbsolutePath));
-                ZapArchive.Origin = Uri.UnescapeDataString(file.Path.AbsolutePath);
-                OnPropertyChanged(nameof(ZapArchive));
+                _mainWindowViewModel.ZapArchive.Origin = Uri.UnescapeDataString(file.Path.AbsolutePath);
+                OnPropertyChanged(nameof(_mainWindowViewModel.ZapArchive));
                 Title = fi.Name;
-                _zapFileService.SaveArchive(ZapArchive, Uri.UnescapeDataString(file.Path.AbsolutePath));
+                _zapFileService.SaveArchive(_mainWindowViewModel.ZapArchive, Uri.UnescapeDataString(file.Path.AbsolutePath));
                 _addFileService.RefreshFolder();
                 await MessageBox.ShowAsync("Saving Complete");
             }
@@ -210,45 +180,45 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         private void Return(object sender, RoutedEventArgs e)
         {
-            if(CurrentDirectory == null)
+            if(_mainWindowViewModel.CurrentDirectory == null)
                 return;
-            BreadCrumbsBar.Remove(BreadCrumbsBar.Last());
-            if(BreadCrumbsBar.Count == 0)
+            _mainWindowViewModel.BreadCrumbsBar.Remove(_mainWindowViewModel.BreadCrumbsBar.Last());
+            if(_mainWindowViewModel.BreadCrumbsBar.Count == 0)
             {
-                CurrentDirectory = null;
+                _mainWindowViewModel.CurrentDirectory = null;
                 return;
             }
 
-            CurrentDirectory = null;
-            CurrentDirectory = BreadCrumbsBar.Last();
+            _mainWindowViewModel.CurrentDirectory = null;
+            _mainWindowViewModel.CurrentDirectory = _mainWindowViewModel.BreadCrumbsBar.Last();
         }
         private void ChangeDirectory(object sender, RoutedEventArgs e)
         {
             Button button = (Button)sender;
             if(button.Tag is DirectoryItem)
             {
-                CurrentDirectory = (DirectoryItem)button.Tag;
-                int directoryPos = BreadCrumbsBar.IndexOf(CurrentDirectory);
-                if((DirectoryItem)button.Tag == BreadCrumbsBar.Last())
+                _mainWindowViewModel.CurrentDirectory = (DirectoryItem)button.Tag;
+                int directoryPos = _mainWindowViewModel.BreadCrumbsBar.IndexOf(_mainWindowViewModel.CurrentDirectory);
+                if((DirectoryItem)button.Tag == _mainWindowViewModel.BreadCrumbsBar.Last())
                     return;
-                for(int i = 0; i < BreadCrumbsBar.Count - directoryPos; i++)
+                for(int i = 0; i < _mainWindowViewModel.BreadCrumbsBar.Count - directoryPos; i++)
                 {
-                    BreadCrumbsBar.Remove(BreadCrumbsBar.Last());
+                    _mainWindowViewModel.BreadCrumbsBar.Remove(_mainWindowViewModel.BreadCrumbsBar.Last());
                 }
             }
             else
             {
-                CurrentDirectory = null;
-                BreadCrumbsBar.Clear();
+                _mainWindowViewModel.CurrentDirectory = null;
+                _mainWindowViewModel.BreadCrumbsBar.Clear();
             }
         }
 
         private void DeleteItem(object sender, RoutedEventArgs e)
         {
-            if(CurrentDirectory == null)
-                ZapArchive.Items.Remove((Item)((MenuItem)sender).Tag);
+            if(_mainWindowViewModel.CurrentDirectory == null)
+                _mainWindowViewModel.ZapArchive.Items.Remove((Item)((MenuItem)sender).Tag);
             else
-                CurrentDirectory.Items.Remove((Item)((MenuItem)sender).Tag);
+                _mainWindowViewModel.CurrentDirectory.Items.Remove((Item)((MenuItem)sender).Tag);
             _addFileService.UnsavedProgress = true;
         }
 
@@ -282,7 +252,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
             if (folder != null)
             {
-                _zapFileService.ExportArchive(ZapArchive, Uri.UnescapeDataString(folder.First().Path.AbsolutePath));
+                _zapFileService.ExportArchive(_mainWindowViewModel.ZapArchive, Uri.UnescapeDataString(folder.First().Path.AbsolutePath));
             }
         }
 
@@ -294,14 +264,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             ListBox? listBox = sender as ListBox;
             if(listBox.SelectedItem is DirectoryItem)
             {
-                CurrentDirectory = (DirectoryItem)listBox.SelectedItem;
-                BreadCrumbsBar.Add(CurrentDirectory);
+                _mainWindowViewModel.CurrentDirectory = (DirectoryItem)listBox.SelectedItem;
+                _mainWindowViewModel.BreadCrumbsBar.Add(_mainWindowViewModel.CurrentDirectory);
             }
-        }
-
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         protected async override void OnClosing(WindowClosingEventArgs e)
@@ -319,5 +284,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             
             _addFileService.PurgeFolder();
             base.OnClosing(e);
+        }
+        
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 }
