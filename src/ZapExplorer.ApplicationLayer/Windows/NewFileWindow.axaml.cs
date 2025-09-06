@@ -24,9 +24,9 @@ public partial class NewFileWindow : Window
         if (!int.TryParse(tbxOffset.Text, out int paddingSize) || !IsTextAllowed(tbxOffset.Text))
         {
             await MessageBox.ShowAsync("Non numeric value entered.");
-            PaddingSize = paddingSize;
             return;
         }
+        PaddingSize = paddingSize;
         Close();
     }
     

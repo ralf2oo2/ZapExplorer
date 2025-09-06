@@ -8,7 +8,6 @@
 
     <Application.Styles>
         <SimpleTheme />
-        <u-semi:SemiTheme Locale="zh-CN" />
-        <u-semi:SemiTheme Locale="zh-CN"/>
+        <u-semi:SemiTheme Locale="en-US"/>
     </Application.Styles>
 </Application>

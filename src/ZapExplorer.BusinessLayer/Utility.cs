@@ -5,8 +5,13 @@ public static class Utility
 {
     public static T DeepClone<T>(this T self)
     {
-        var serialized = JsonConvert.SerializeObject(self);
-        return JsonConvert.DeserializeObject<T>(serialized);
+        var settings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.All,
+            Formatting = Formatting.None
+        };
+        var serialized = JsonConvert.SerializeObject(self, settings);
+        return JsonConvert.DeserializeObject<T>(serialized, settings);
     }
 }
 

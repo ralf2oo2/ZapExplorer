@@ -74,19 +74,19 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         BreadCrumbsBar = new ObservableCollection<DirectoryItem>();
     }
     
-    private void NewFile(object sender, RoutedEventArgs e)
+    private async void NewFile(object sender, RoutedEventArgs e)
         {
             if (_addFileService.UnsavedProgress)
             {
-                var result = MessageBox.ShowAsync("There are unsaved changes, Discard changes?", "Warning", MessageBoxIcon.None, MessageBoxButton.YesNo);
-                if (!result.IsCompleted)
+                var result = await MessageBox.ShowAsync("There are unsaved changes, Discard changes?", "Warning", MessageBoxIcon.None, MessageBoxButton.YesNo);
+                if (!(result == MessageBoxResult.OK))
                 {
                     return;
                 }
             }
             Title = "ZapExplorer";
             NewFileWindow newFileWindow = new NewFileWindow();
-            newFileWindow.ShowDialog(this);
+            await newFileWindow.ShowDialog(this);
             if (newFileWindow.Confirmed)
             {
                 Title = "New File";
@@ -102,8 +102,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             if (_addFileService.UnsavedProgress)
             {
-                var result = MessageBox.ShowAsync("There are unsaved changes, Discard changes?", "Warning", MessageBoxIcon.None,MessageBoxButton.YesNo);
-                if (!result.IsCompleted)
+                var result = await MessageBox.ShowAsync("There are unsaved changes, Discard changes?", "Warning", MessageBoxIcon.None,MessageBoxButton.YesNo);
+                if (!(result == MessageBoxResult.OK))
                 {
                     return;
                 }
@@ -160,10 +160,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 }
             }
         }
-        private void CreateFolder(object sender, RoutedEventArgs e)
+        private async void CreateFolder(object sender, RoutedEventArgs e)
         {
             CreateFolderWindow createFolderWindow = new CreateFolderWindow();
-            createFolderWindow.ShowDialog(this);
+            await createFolderWindow.ShowDialog(this);
             if(createFolderWindow.Confirmed)
             {
                 DirectoryItem directoryItem = new DirectoryItem(createFolderWindow.FolderName);
@@ -179,12 +179,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             }
         }
 
-        private void WindowClosing(object sender, CancelEventArgs e)
+        private async void WindowClosing(object sender, CancelEventArgs e)
         {
             if(_addFileService.UnsavedProgress)
             {
-                var result = MessageBox.ShowAsync("There are unsaved changes, Do you want to quit?", "Warning", MessageBoxIcon.None, MessageBoxButton.YesNo);
-                if (!result.IsCompleted)
+                var result = await MessageBox.ShowAsync("There are unsaved changes, Do you want to quit?", "Warning", MessageBoxIcon.None, MessageBoxButton.YesNo);
+                if (!(result == MessageBoxResult.OK))
                 {
                     e.Cancel = true;
                     return;
@@ -193,11 +193,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             _addFileService.PurgeFolder();
         }
 
-        private void SaveFile(object sender, RoutedEventArgs e)
+        private async void SaveFile(object sender, RoutedEventArgs e)
         {
             _zapFileService.SaveArchive(ZapArchive, ZapArchive.Origin);
             _addFileService.RefreshFolder();
-            MessageBox.ShowAsync("Saving Complete");
+            await MessageBox.ShowAsync("Saving Complete");
         }
 
         private async void SaveFileAs(object sender, RoutedEventArgs e)
