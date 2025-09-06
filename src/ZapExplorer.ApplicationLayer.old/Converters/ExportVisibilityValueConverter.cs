@@ -1,24 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
-using Avalonia.Data.Converters;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Data;
 using ZapExplorer.BusinessLayer.Models;
 
 namespace ZapExplorer.ApplicationLayer.Converters
 {
-    public class CanSaveValueConverter : IValueConverter
+    public class ExportVisibilityValueConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
-                return false;
-            if(value is ZapArchive)
-            {
-                if(((ZapArchive)value).Origin != null)
-                {
-                    return true;
-                }
-            }
-            return false;
+            if(value is FileItem)
+                return Visibility.Visible;
+            return Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

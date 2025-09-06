@@ -1,24 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
-using Avalonia.Data.Converters;
-using ZapExplorer.BusinessLayer.Models;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace ZapExplorer.ApplicationLayer.Converters
 {
-    public class CanSaveValueConverter : IValueConverter
+    public class OpenFileActionsValueConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null)
                 return false;
-            if(value is ZapArchive)
-            {
-                if(((ZapArchive)value).Origin != null)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return true;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

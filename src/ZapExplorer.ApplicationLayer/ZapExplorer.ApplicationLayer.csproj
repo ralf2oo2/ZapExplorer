@@ -1,29 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UseWPF>true</UseWPF>
-    <AssemblyName>ZapExplorer</AssemblyName>
-  </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.3.5"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.5"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.5"/>
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.5"/>
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.3.5">
+            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="ByteSize" Version="2.1.2" />
+        <PackageReference Include="Irihi.Ursa" Version="1.12.0" />
+        <PackageReference Include="Irihi.Ursa.Themes.Semi" Version="1.12.0" />
+        <PackageReference Include="Xaml.Behaviors" Version="11.3.2" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="icon.ico" />
-  </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\ZapExplorer.BusinessLayer\ZapExplorer.BusinessLayer.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="ByteSize" Version="2.1.1" />
-    <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
-    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
-  </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Assets\" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ZapExplorer.BusinessLayer\ZapExplorer.BusinessLayer.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="icon.ico" />
-  </ItemGroup>
-
+    <ItemGroup>
+      <None Remove="icon.ico" />
+      <AvaloniaResource Include="icon.ico" />
+    </ItemGroup>
 </Project>

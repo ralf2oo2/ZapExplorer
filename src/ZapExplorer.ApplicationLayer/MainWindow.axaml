@@ -1,0 +1,153 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:ZapExplorer.ApplicationLayer.Converters"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="ZapExplorer.ApplicationLayer.MainWindow"
+        x:CompileBindings="False"
+        Title="ZapExplorer" Height="450" Width="800"  Icon="icon.ico">
+        <Window.Resources>
+                <DrawingImage x:Key="arrow">
+                        <DrawingImage.Drawing>
+                                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                        <GeometryDrawing Brush="White" Geometry="F1 M24,24z M0,0z M12.718,4.707L12.718,4.707 11.305,3.292 2.585,12 11.305,20.707 12.718,19.292 6.417,13 20,13 20,11 6.416,11 12.718,4.707z" />
+                                </DrawingGroup>
+                        </DrawingImage.Drawing>
+                </DrawingImage>
+                <ControlTheme x:Key="linkButton" TargetType="Button">
+                        <Setter Property="Foreground" Value="White" />
+                        <Interaction.Behaviors>
+                                <EventTriggerBehavior EventName="IsMouseOver">
+                                        <ChangePropertyAction PropertyName="Foreground" Value="LightGray" />
+                                </EventTriggerBehavior>
+                        </Interaction.Behaviors>
+                </ControlTheme>
+                <converters:DirectoryItemMultiConverter x:Key="DirectoryMultiConverter"/>
+                <converters:FileIconValueConverter x:Key="FileIconValueConverter"/>
+                <converters:FileSizeNotationValueConverter x:Key="FileSizeNotationValueConverter"/>
+                <converters:FileSizeVisibilityValueConverter x:Key="FileSizeVisibilityValueConverter"/>
+                <converters:OpenFileActionsValueConverter x:Key="OpenFileActionsValueConverter"/>
+                <converters:CanSaveValueConverter x:Key="CanSaveValueConverter"/>
+                <converters:ExportVisibilityValueConverter x:Key="ExportVisibilityValueConverter"/>
+        </Window.Resources>
+        <Grid Background="#3d4876">
+                <Grid.RowDefinitions>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="20"/>
+                </Grid.RowDefinitions>
+                <Menu Background="#3d4876" Foreground="White">
+                        <MenuItem Header="_File">
+                                <MenuItem Header="_New..." Click="NewFile" Foreground="Black"/>
+                                <MenuItem Header="_Open..." Click="OpenFile" Foreground="Black"/>
+                                <MenuItem Header="_Save..." Click="SaveFile" Foreground="Black" IsEnabled="{Binding ZapArchive, Converter={StaticResource CanSaveValueConverter}}"/>
+                                <MenuItem Header="_Save As..." Click="SaveFileAs" Foreground="Black" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
+                                <MenuItem Header="_Export..." Click="ExportArchive" Foreground="Black" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
+                        </MenuItem>
+                        <MenuItem Header="_Add">
+                                <MenuItem Header="_Import File..." Click="AddFile" Foreground="Black" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
+                                <MenuItem Header="Create New Folder..." Click="CreateFolder" Foreground="Black" IsEnabled="{Binding ZapArchive, Converter={StaticResource OpenFileActionsValueConverter}}"/>
+                        </MenuItem>
+                </Menu>
+                
+                <!-- Breadcrumbs bar -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="24"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="24"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Click="Return">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Image Source="{StaticResource arrow}"/>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Border BorderBrush="#333d66" BorderThickness="2" Grid.Column="1">
+                        <ScrollViewer VerticalScrollBarVisibility="Hidden">
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Root" Tag="root" Theme="{StaticResource linkButton}" Click="ChangeDirectory" Grid.Column="1">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <TextBlock>
+                                        <ContentPresenter />
+                                            </TextBlock>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <ItemsControl ItemsSource="{Binding BreadCrumbsBar}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Content="{Binding Name}" Theme="{StaticResource linkButton}" Tag="{Binding}" Click="ChangeDirectory">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="14"/>
+                                                                <ColumnDefinition Width="auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock Text=" >"/>
+                                                            <TextBlock Grid.Column="1">
+                                                                <ContentPresenter />
+                                                            </TextBlock>
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+                <!-- File explorer -->
+                <ListBox Background="#232A46" DoubleTapped="OnItemMouseDoubleClick" Grid.Row="2">
+                    <ListBox.Theme>
+                        <ControlTheme TargetType="ListBox">
+                            <Setter Property="BorderThickness" Value="0"/>
+                        </ControlTheme>
+                    </ListBox.Theme>
+                    <ListBox.ItemsSource>
+                        <MultiBinding Converter="{StaticResource DirectoryMultiConverter}">
+                            <Binding Path="ZapArchive"/>
+                            <Binding Path="CurrentDirectory" UpdateSourceTrigger="PropertyChanged"/>
+                        </MultiBinding>
+                    </ListBox.ItemsSource>
+                    <ListBox.ItemContainerTheme>
+                        <ControlTheme TargetType="{x:Type ListBoxItem}">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        </ControlTheme>
+                    </ListBox.ItemContainerTheme>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Tag="{Binding}" Click="DeleteItem" Header="_Delete"/>
+                                        <MenuItem Tag="{Binding}" Click="ExportItem" IsVisible="{Binding ., Converter={StaticResource ExportVisibilityValueConverter}}" Header="_Export..."/>
+                                    </ContextMenu>
+                                </Grid.ContextMenu>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="50"/>
+                                </Grid.ColumnDefinitions>
+                                <Image/>
+                                <TextBlock Text="{Binding Name}" Margin="3,0,0,0" Foreground="White" Grid.Column="1"/>
+                                <TextBlock Text="{Binding Size, Converter={StaticResource FileSizeNotationValueConverter}}" IsVisible="{Binding ., Converter={StaticResource FileSizeVisibilityValueConverter}}" Foreground="White" Grid.Column="3"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+        </Grid>
+</Window>
